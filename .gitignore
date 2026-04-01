@@ -1,0 +1,22 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# 环境变量文件（避免泄露密钥）
+.env
+
+# IDE 配置
+.vscode/
+.idea/
+
+# 操作系统元数据
+.DS_Store
+Thumbs.db
+
