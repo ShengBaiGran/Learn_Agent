@@ -30,10 +30,10 @@ async def main():
         异步主函数
     '''
     print("Modbus 测试 Agent 已启动。")
-    print("示例命令: 测试转速 500 重复 3 误差 5 \n   注意必须要这样。因为这只是关键字识别，没有接入LLM，只用于验证LangGraph的流程图。")
+    print("示例命令: 测试转速 500 重复 3 误差 5 \n注意必须要这样。因为这只是关键字识别，没有接入LLM，只用于验证LangGraph的流程图。")
     while True:
         user = input("\n你: ")
-        if user.lower() in ("/exit()", "/quit()"):
+        if user.lower() in ("/exit", "/quit"):
             break
         
         # 这里简单解析用户意图（实际可交给 LLM 解析，但先硬编码示例）
@@ -71,7 +71,7 @@ async def main():
             "error_msg": None,
             "last_action": "start"
         }
-        final_state = await test_graph.ainvoke(init_state)
+        final_state = await test_graph.ainvoke(init_state)#会在这里循环知道结束
         print("\n=== 测试完成 ===")
         print(f"最终状态: 完成循环数 {final_state['current_cycle']}/{cycles}")
         if final_state.get("error_msg"):

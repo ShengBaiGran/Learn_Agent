@@ -65,10 +65,10 @@ async def wait_stable(state: TestState) -> TestState:
         节点2：等待数据稳定
     """
 #函数体
-    if DEBUG_MODE_MODBUS_TEST:
-        print("调用wait_stable()")#调试用
-
     time_s: float = 1.0
+    if DEBUG_MODE_MODBUS_TEST:
+        print(f"调用wait_stable() {time_s}s")#调试用
+
     await asyncio.sleep(time_s)
     state["last_action"] = f"wait {time_s}s"
     return state

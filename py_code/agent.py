@@ -25,14 +25,14 @@ async def write_holding_register(addr: int, value: int, unit: int = 1) -> bool:
     # 模拟写入延迟（真实会有延迟这里软件替代）
     await asyncio.sleep(0.1) #秒
     _device_register = value
-    print(f"[DEBUG] 写入寄存器 {addr} 值 {value}")
+    print(f"[DEBUG] 写入寄存器 {addr: #07X} 值 {value: #07X}")
     return True
 
 async def read_holding_register(addr: int, unit: int = 1) -> Optional[int]:
     """模拟读寄存器"""
     global _device_register
     await asyncio.sleep(0.1)
-    print(f"[DEBUG] 读取寄存器 {addr} 值 {_device_register}")
+    print(f"[DEBUG] 读取寄存器 {addr: #07X} 值 {_device_register: #07X}")
     return _device_register
 
 # ==================== 环境变量加载 ====================
