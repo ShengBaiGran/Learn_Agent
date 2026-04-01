@@ -148,6 +148,11 @@ async def validate(state: TestState) -> TestState:
 # 在 read_speed 之后，总是进入 validate
 
 # 这里不用异步函数，改用同步函数
+'''
+Q:为什么有时候用异步有时候用同步？
+A:在 Python 异步编程中，任何使用了 await 的函数，其本身必须定义为 async def，
+而调用它的函数也必须在 async def 中使用 await 调用，形成一个“异步传染链”。
+'''
 def after_validate(state: TestState) -> str:
     '''
     Brief: 
@@ -161,7 +166,7 @@ def after_validate(state: TestState) -> str:
     '''
 #函数实体
     if DEBUG_MODE_MODBUS_TEST:
-        print("调用validate()")#调试用
+        print("调用after_validate()")#调试用
 
     if state["current_cycle"] >= state["max_cycles"]:
         return "end"

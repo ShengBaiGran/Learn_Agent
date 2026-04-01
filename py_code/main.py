@@ -7,7 +7,7 @@ import asyncio
 '''
 async def main():
     """异步主函数，负责交互循环"""
-    print("🤖 文件助手已启动，输入 “/exit()” 或 “/quit()” 退出。\n      或者向我表达想退出的意向。\n")
+    print("🤖 文件助手已启动，输入 “/exit()” 或 “/quit()” 退出。\n或者向我表达想退出的意向。\n")
     while True:
         # 获取用户输入（同步阻塞，但整体是异步环境，这里可以接受）
         user = input("用户: ")
@@ -30,10 +30,10 @@ async def main():
         异步主函数
     '''
     print("Modbus 测试 Agent 已启动。")
-    print("示例命令: 测试转速 500，重复 3 次，误差 5%")
+    print("示例命令: 测试转速 500 重复 3 误差 5 \n   注意必须要这样。因为这只是关键字识别，没有接入LLM，只用于验证LangGraph的流程图。")
     while True:
         user = input("\n你: ")
-        if user.lower() in ("exit", "quit"):
+        if user.lower() in ("/exit()", "/quit()"):
             break
         
         # 这里简单解析用户意图（实际可交给 LLM 解析，但先硬编码示例）
