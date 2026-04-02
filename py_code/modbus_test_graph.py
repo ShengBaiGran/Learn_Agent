@@ -2,7 +2,7 @@
 from typing import TypedDict, Optional, List, Annotated
 from langgraph.graph import StateGraph, END, START
 import asyncio
-from agent import write_holding_register, read_holding_register
+from py_code.agent import write_holding_register, read_holding_register
 
 DEBUG_MODE_MODBUS_TEST: bool = True
 
