@@ -1,6 +1,7 @@
 #main.py
-from py_code.agent import llm 
-from py_code.modbus_test_graph import test_graph
+from typing import cast
+from py_code.agent import llm
+from py_code.modbus_test_graph import test_graph, TestState
 import asyncio
 import json
 
@@ -26,7 +27,57 @@ async def main():
 '''
 
 # 定义解析函数
-async def parse_test_params(user_input: str):
+def _content_to_text(content: object) -> str:
+    """将 LLM 返回的 content 统一转换为纯文本字符串。"""
+    if isinstance(content, str):
+        return content
+
+    if isinstance(content, list):
+        chunks: list[str] = []
+        for item in content:
+            if isinstance(item, str):
+                chunks.append(item)
+            elif isinstance(item, dict):
+                item_dict = cast(dict[str, object], item)
+                text_value = item_dict.get("text")
+                if isinstance(text_value, str):
+                    chunks.append(text_value)
+                else:
+                    chunks.append(json.dumps(item_dict, ensure_ascii=False))
+            else:
+                chunks.append(str(item))
+        return "".join(chunks)
+
+    return str(content)
+
+
+def _to_int(value: object, default: int) -> int:
+    """将未知类型转换为 int；失败时返回默认值。"""
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float):
+        return int(value)
+    if isinstance(value, str):
+        try:
+            return int(float(value.strip().rstrip("%")))
+        except ValueError:
+            return default
+    return default
+
+
+def _to_float(value: object, default: float) -> float:
+    """将未知类型转换为 float；失败时返回默认值。"""
+    if isinstance(value, (int, float)):
+        return float(value)
+    if isinstance(value, str):
+        try:
+            return float(value.strip().rstrip("%"))
+        except ValueError:
+            return default
+    return default
+
+
+async def parse_test_params(user_input: str) -> tuple[int, int, float]:
     """
     调用 LLM 从用户输入中提取测试参数。
     返回 (target_speed, max_cycles, error_tolerance)
@@ -48,18 +99,20 @@ async def parse_test_params(user_input: str):
     try:
         print("LLM处理")
         response = await llm.ainvoke(prompt)
-        text = response.content
-        print("输出的json为：\n"+text)
+        text = _content_to_text(response.content)
+        print(f"输出的json为：\n{text}")
         
         # 尝试从响应中提取 JSON（可能前后有额外文字）
         start = text.find('{')
         end = text.rfind('}') + 1
         if start != -1 and end > start:
-            params = json.loads(text[start:end])
-            target = params.get("target_speed", 500)
-            cycles = params.get("max_cycles", 3)
-            tolerance = params.get("error_tolerance", 5.0)
-            return target, cycles, tolerance
+            params_raw: object = json.loads(text[start:end])
+            if isinstance(params_raw, dict):
+                params_dict = cast(dict[str, object], params_raw)
+                target = _to_int(params_dict.get("target_speed"), 500)
+                cycles = _to_int(params_dict.get("max_cycles"), 3)
+                tolerance = _to_float(params_dict.get("error_tolerance"), 5.0)
+                return target, cycles, tolerance
     except Exception as e:
         print(f"解析参数出错: {e}")
     # 解析失败，返回默认值
@@ -111,7 +164,7 @@ async def main():
 
         # 打印信息检查字符匹配
         print(f"开始测试: 目标转速={target}, 循环={cycles}, 误差容限={tolerance}%") 
-        init_state = { # 定义一个组完事后直接开始赋值
+        init_state: TestState = { # 定义一个组完事后直接开始赋值
             "target_speed": target,
             "max_cycles": cycles,
             "error_tolerance": tolerance,
@@ -122,7 +175,7 @@ async def main():
             "last_action": "start"
         }
         # ainvoke是LangGraph的一个异步调用方法，用于启动图的执行。接收到参数后会自动运行整个图。
-        final_state = await test_graph.ainvoke(init_state) # 异步调用并传入参数，并直接提取返回状态。这里会循环
+        final_state = cast(TestState, await test_graph.ainvoke(init_state)) # 异步调用并传入参数，并直接提取返回状态。这里会循环
         print("\n=== 测试完成 ===")
         print(f"最终状态: 完成循环数 {final_state['current_cycle']}/{cycles}")
         if final_state.get("error_msg"):
